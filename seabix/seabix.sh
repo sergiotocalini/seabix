@@ -182,6 +182,7 @@ if [[ ${REPORT} -eq 1 ]]; then
 	rval=$( get_stats 'server' ${item} )
 	echo "\"`hostname -f`\" \"seabix[server, ${item}]\" ${TIMESTAMP} \"${rval}\"" >> ${report_file}
     done
+    zabbix_sender -z ${REPORT_ATTR[0]:-localhost} -p ${REPORT_ATTR[1]:-10051} -i ${report_file} -T
     exit 0
 fi
 
