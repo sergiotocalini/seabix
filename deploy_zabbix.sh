@@ -12,3 +12,7 @@ cp -rv ${SOURCE_DIR}/seabix/zabbix_agentd.conf     ${ZABBIX_DIR}/zabbix_agentd.d
 sed -i "s|SEAFILE_URL=.*|SEAFILE_URL=\"${SEAFILE_URL}\"|g" ${ZABBIX_DIR}/scripts/agentd/seabix/seabix.conf
 sed -i "s|SEAFILE_TOKEN=.*|SEAFILE_TOKEN=\"${SEAFILE_TOKEN}\"|g" ${ZABBIX_DIR}/scripts/agentd/seabix/seabix.conf
 
+crontab -u zabbix -l > /tmp/zabbix-crontab
+echo "00 * * * * ${ZABBIX_DIR}/scripts/agentd/seabix/seabix.sh -r /etc/zabbix/zabbix_agentd.conf" >> /tmp/zabbix-crontab
+crontab /tmp/zabbix-crontab
+rm /tmp/zabbix-crontab
