@@ -70,7 +70,7 @@ refresh_cache() {
 	done
 	
 	resource="${SEAFILE_URL}/api2/accounts"
-	json_raw="{ \"server-info\": ${server_info}, \"accounts\":[], \"updated_on\": ${TIMESTAMP}}"
+	json_raw="{ \"server_info\": ${server_info}, \"accounts\":[], \"updated_on\": ${TIMESTAMP}}"
 	for user in ${users[@]}; do
 	    email=`echo ${user} | sed 's:"::g' | awk -F'|' '{print $1}'`
 	    source=`echo ${user} | sed 's:"::g' | awk -F'|' '{print $2}'`
@@ -103,7 +103,7 @@ get_stats() {
     json=$(refresh_cache)
     if [[ ${type} =~ ^server$ ]]; then
 	if [[ ${name} == 'version' ]]; then
-	    res=`jq -r ".server-info.version" ${json}`
+	    res=`jq -r ".server_info.version" ${json}`
 	elif [[ ${name} == 'storage_used_avg' ]]; then
 	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json}`
 	    all=`echo "${raw}" | wc -l | awk '{$1=$1};1'`
