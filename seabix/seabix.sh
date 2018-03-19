@@ -175,7 +175,6 @@ while getopts "s::a:s:uphvrj:" OPTION; do
 done
 
 if [[ ${REPORT} -eq 1 ]]; then
-    IFS=${IFS_DEFAULT}
     report_file=${CACHE_DIR}/zabbix.data
     items=( 'version' 'storage_used_avg' 'storage_used_median' 'storage_used_mode')
     echo -n "" > ${report_file}
