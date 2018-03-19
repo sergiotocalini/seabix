@@ -14,5 +14,5 @@ sed -i "s|SEAFILE_TOKEN=.*|SEAFILE_TOKEN=\"${SEAFILE_TOKEN}\"|g" ${ZABBIX_DIR}/s
 
 crontab -u zabbix -l > /tmp/zabbix-crontab
 echo "00 * * * * ${ZABBIX_DIR}/scripts/agentd/seabix/seabix.sh -r /etc/zabbix/zabbix_agentd.conf" >> /tmp/zabbix-crontab
-crontab /tmp/zabbix-crontab
+crontab -u zabbix /tmp/zabbix-crontab
 rm /tmp/zabbix-crontab
