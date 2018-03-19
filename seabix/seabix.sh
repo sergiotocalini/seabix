@@ -146,7 +146,7 @@ get_service() {
 #################################################################################
 
 #################################################################################
-while getopts "s::a:s:uphvj:" OPTION; do
+while getopts "s::a:s:uphvrj:" OPTION; do
     case ${OPTION} in
 	h)
 	    usage
@@ -161,6 +161,10 @@ while getopts "s::a:s:uphvj:" OPTION; do
 	a)
 	    ARGS[${#ARGS[*]}]=${OPTARG//p=}
 	    ;;
+	r)
+	    REPORT=1
+	    IFS=":" REPORT_ATTR=(${OPTARG//p=})
+	    ;;
 	v)
 	    version
 	    ;;
@@ -169,6 +173,17 @@ while getopts "s::a:s:uphvj:" OPTION; do
             ;;
     esac
 done
+
+if [[ ${REPORT} -eq 1 ]]; then
+    report_file=${CACHE_DIR}/zabbix.data
+    items=( 'version' 'storage_used_avg' 'storage_used_media' 'storage_used_mode')
+    echo "" > ${report_file}
+    for item in ${items[@]}; do
+	rval=$( get_stats 'server' ${item} )
+	echo "\"`hostname -f`\" \"seabix[server, ${item}]\" ${TIMESTAMP} \"${rval}\"" >> ${report_file}
+    done
+    exit 0
+fi
 
 if [[ ${JSON} -eq 1 ]]; then
     rval=$(discovery ${ARGS[*]})
