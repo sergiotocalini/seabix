@@ -1,6 +1,7 @@
 #!/usr/bin/env ksh
 SOURCE_DIR=$(dirname $0)
 ZABBIX_DIR=/etc/zabbix
+ZABBIX_CONF=/etc/zabbix/zabbix_agentd.conf
 
 SEAFILE_URL=${1:-http://localhost:8000}
 SEAFILE_TOKEN=${2}
@@ -13,6 +14,11 @@ sed -i "s|SEAFILE_URL=.*|SEAFILE_URL=\"${SEAFILE_URL}\"|g" ${ZABBIX_DIR}/scripts
 sed -i "s|SEAFILE_TOKEN=.*|SEAFILE_TOKEN=\"${SEAFILE_TOKEN}\"|g" ${ZABBIX_DIR}/scripts/agentd/seabix/seabix.conf
 
 crontab -u zabbix -l > /tmp/zabbix-crontab
-echo "00 * * * * ${ZABBIX_DIR}/scripts/agentd/seabix/seabix.sh -r /etc/zabbix/zabbix_agentd.conf" >> /tmp/zabbix-crontab
-crontab -u zabbix /tmp/zabbix-crontab
+CRONTAB_LINE="00 * * * * ${ZABBIX_DIR}/scripts/agentd/seabix/seabix.sh -r ${ZABBIX_CONF}"
+if ! [[ `grep "${CRONTAB_LINE}" /tmp/zabbix-crontab` ]]; then
+    if ! [[ `grep "seabix.sh" /tmp/zabbix-crontab` ]]; then
+	echo "${CRONTAB_LINE}" >> /tmp/zabbix-crontab
+	crontab -u zabbix /tmp/zabbix-crontab
+    fi
+fi
 rm /tmp/zabbix-crontab
