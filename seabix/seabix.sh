@@ -127,7 +127,7 @@ get_service() {
     resource=${1}
 
     port=`echo "${SEAFILE_URL}" | sed -e 's|.*://||g' -e 's|/||g' | awk -F: '{print $2}'`
-    pid=`sudo lsof -Pi :${port:-8080} -sTCP:LISTEN -t`
+    pid=`sudo lsof -Pi :${port:-8080} -sTCP:LISTEN -t | head -1`
     rcode="${?}"
     if [[ ${resource} == 'listen' ]]; then
 	if [[ ${rcode} == 0 ]]; then
