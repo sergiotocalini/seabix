@@ -176,7 +176,7 @@ done
 
 if [[ ${REPORT} -eq 1 ]]; then
     report_file=${CACHE_DIR}/zabbix.data
-    items=( 'version' 'storage_used_avg' 'storage_used_media' 'storage_used_mode')
+    items=( 'version' 'storage_used_avg' 'storage_used_median' 'storage_used_mode')
     echo -n "" > ${report_file}
     for item in ${items[@]}; do
 	rval=$( get_stats 'server' ${item} )
