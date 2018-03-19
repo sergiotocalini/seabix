@@ -56,7 +56,7 @@ refresh_cache() {
     IFS=${IFS_DEFAULT}
     [[ -d ${CACHE_DIR} ]] || mkdir -p ${CACHE_DIR}
     file=${CACHE_DIR}/data.json
-    if ! [[ $(( `stat -c '%Y' "${file}" 2>/dev/null`+60*${CACHE_TTL} )) -le ${TIMESTAMP} ]]; then
+    if [[ $(( `stat -c '%Y' "${file}" 2>/dev/null`+60*${CACHE_TTL} )) -le ${TIMESTAMP} ]]; then
 	header="Authorization: Token ${SEAFILE_TOKEN}"
 	resource="${SEAFILE_URL}/api2/server-info/"
 	server_info=`curl -s -H "${header}" "${resource}"|jq -c '.' 2>/dev/null`
