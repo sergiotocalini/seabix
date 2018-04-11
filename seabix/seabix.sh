@@ -87,7 +87,7 @@ discovery() {
     resource=${1}
     json=$(refresh_cache)
     if [[ ${resource} == 'users' ]]; then
-    	for job in `jq -r '.accounts[]|"\(.email)|\(.source)"' ${json}`; do
+    	for job in `jq -r '.accounts[]|"\(.email)|\(.source)|\(.is_active)"' ${json}`; do
     	    echo ${job}
     	done
     fi
@@ -96,28 +96,38 @@ discovery() {
 
 get_stats() {
     type=${1}
-    name=${2}
-    resource=${3}
+    resource=${2}
+    name=${3}
     param1=${4}
     param2=${5}
     json=$(refresh_cache)
     if [[ ${type} =~ ^server$ ]]; then
-	if [[ ${name} == 'version' ]]; then
+	if [[ ${resource} == 'version' ]]; then
 	    res=`jq -r ".server_info.version" ${json}`
-	elif [[ ${name} == 'storage_used_avg' ]]; then
+	elif [[ ${resource} == 'storage_used_avg' ]]; then
 	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json}`
 	    all=`echo "${raw}" | wc -l | awk '{$1=$1};1'`
 	    sum=`echo "${raw}" | awk '{n += $1}; END{printf("%.1f\n", n)}'`
 	    res=`echo $(( ${sum:-0} / ${all} )) | awk '{printf("%.2f\n", $1)}'`
-	elif [[ ${name} == 'storage_used_median' ]]; then
+	elif [[ ${resource} == 'storage_used_median' ]]; then
 	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json} | sort -n`
 	    all=`echo "${raw}" | wc -l | awk '{$1=$1};1'`
 	    [ $((${all}%2)) -ne 0 ] && let "all=all+1"
 	    num=`echo $(( ${all} / 2))`
 	    res=`sed -n "${num}"p <<< "${raw}"`
-	elif [[ ${name} == 'storage_used_mode' ]]; then
+	elif [[ ${resource} == 'storage_used_mode' ]]; then
 	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json} | sort -n`
 	    res=`echo "${raw}" | uniq -c | sort -k 1 | tail -1 | awk '{print $2}'`
+	fi
+    elif [[ ${type} =~ ^user$ ]]; then
+	if [[ ${resource} == 'storage_usage_perc' ]]; then
+	    total=`jq -r ".accounts[]|select(.email==\"${name}\")|.total"`
+	    usage=`jq -r ".accounts[]|select(.email==\"${name}\")|.usage"`
+	    res=`echo $(( (${usage}*100)/${total} ))`
+	elif [[ ${resource} == 'storage_usage' ]]; then
+	    res=`jq -r ".accounts[]|select(.email==\"${name}\")|.usage"`
+	elif [[ ${resource} == 'storage_total' ]]; then
+	    res=`jq -r ".accounts[]|select(.email==\"${name}\")|.total"`
 	fi
     fi
     echo ${res:-0}
