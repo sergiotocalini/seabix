@@ -87,7 +87,7 @@ discovery() {
     resource=${1}
     json=$(refresh_cache)
     if [[ ${resource} == 'users' ]]; then
-    	for job in `jq -r '.accounts[]|"\(.email)|\(.source)|\(.is_active)"' ${json}`; do
+    	for job in `jq -r '.accounts[]|"\(.id)|\(.email)|\(.source)|\(.is_active)"' ${json}`; do
     	    echo ${job}
     	done
     fi
