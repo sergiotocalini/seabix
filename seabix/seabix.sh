@@ -84,6 +84,7 @@ refresh_cache() {
 }
 
 discovery() {
+    IFS=${IFS_DEFAULT}
     resource=${1}
     json=$(refresh_cache)
     if [[ ${resource} == 'users' ]]; then
