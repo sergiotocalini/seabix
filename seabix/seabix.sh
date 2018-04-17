@@ -88,7 +88,9 @@ discovery() {
     json=$(refresh_cache)
     if [[ ${resource} == 'users' ]]; then
     	for u in `jq -r '.accounts[]|"\(.id)|\(.email)|\(.source)|\(.is_active)|\(.usage)"' ${json}`; do
-    	    echo ${u}
+	    if [[ `echo ${u} | awk -F '|' '{print $1}'` != 'null' ]]; then
+    		echo ${u}
+	    fi
     	done
     fi
     return 0
