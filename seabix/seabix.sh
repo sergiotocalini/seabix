@@ -106,31 +106,35 @@ get_stats() {
     json=$(refresh_cache)
     if [[ ${type} =~ ^server$ ]]; then
 	if [[ ${resource} == 'version' ]]; then
-	    res=`jq -r ".server_info.version" ${json}`
+	    res=`jq -r ".server_info.version" ${json} 2>/dev/null`
 	elif [[ ${resource} == 'storage_used_avg' ]]; then
-	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json}`
+	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json} 2>/dev/null`
 	    all=`echo "${raw}" | wc -l | awk '{$1=$1};1'`
 	    sum=`echo "${raw}" | awk '{n += $1}; END{printf("%.1f\n", n)}'`
 	    res=`echo $(( ${sum:-0} / ${all} )) | awk '{printf("%.2f\n", $1)}'`
 	elif [[ ${resource} == 'storage_used_median' ]]; then
-	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json} | sort -n`
+	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json} 2>/dev/null | sort -n`
 	    all=`echo "${raw}" | wc -l | awk '{$1=$1};1'`
 	    [ $((${all}%2)) -ne 0 ] && let "all=all+1"
 	    num=`echo $(( ${all} / 2))`
 	    res=`sed -n "${num}"p <<< "${raw}"`
 	elif [[ ${resource} == 'storage_used_mode' ]]; then
-	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json} | sort -n`
+	    raw=`jq -r ".accounts[]|(.usage * 100) / .total" ${json} 2>/dev/null | sort -n`
 	    res=`echo "${raw}" | uniq -c | sort -k 1 | tail -1 | awk '{print $2}'`
 	fi
     elif [[ ${type} =~ ^user$ ]]; then
 	if [[ ${resource} == 'storage_usage_perc' ]]; then
-	    total=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\")|.total" ${json}`
-	    usage=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\")|.usage" ${json}`
+	    total=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\") \
+	    	      | .total" ${json} 2>/dev/null`
+	    usage=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\") \
+	    	      | .usage" ${json} 2>/dev/null`
 	    res=`echo $(( (${usage:-0}*100)/${total:-1} ))`
 	elif [[ ${resource} == 'storage_usage' ]]; then
-	    res=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\")|.usage" ${json}`
+	    res=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\") \
+	    	    | .usage" ${json} 2>/dev/null`
 	elif [[ ${resource} == 'storage_total' ]]; then
-	    res=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\")|.total" ${json}`
+	    res=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\") \
+	    	    | .total" ${json} 2>/dev/null`
 	fi
     fi
     echo ${res:-0}
