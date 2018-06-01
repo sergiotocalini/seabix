@@ -64,7 +64,7 @@ refresh_cache() {
 	resource="${SEAFILE_URL}/api2/accounts/?scope=DB "
 	resource+="${SEAFILE_URL}/api2/accounts/?scope=LDAP"
 	for src in ${resource[@]}; do
-	    for user in `curl -s -H "${header}" "${src}"|jq '.[]|"\(.email)|\(.source)"'`; do
+	    for user in `curl -s -H "${header}" "${src}"|jq '.[]|"\(.email)|\(.source)"' 2>/dev/null`; do
 		users+="${user} "
 	    done
 	done
@@ -75,8 +75,8 @@ refresh_cache() {
 	    email=`echo ${user} | sed 's:"::g' | awk -F'|' '{print $1}'`
 	    source=`echo ${user} | sed 's:"::g' | awk -F'|' '{print $2}'`
 	    raw=`curl -s -H "${header}" "${resource}/${email}/"`
-	    user_data=`echo "${raw}" | jq -c '.source="'${source}'"'`
-	    json_raw=`echo "${json_raw}" | jq -c ".accounts+=[${user_data}]"`
+	    user_data=`echo "${raw}" | jq -c '.source="'${source}'"' 2>/dev/null`
+	    json_raw=`echo "${json_raw}" | jq -c ".accounts+=[${user_data}]" 2>/dev/null`
 	done
 	echo "${json_raw}" | jq . 2>/dev/null > ${file}
     fi
@@ -88,7 +88,7 @@ discovery() {
     resource=${1}
     json=$(refresh_cache)
     if [[ ${resource} == 'users' ]]; then
-    	for u in `jq -r '.accounts[]|"\(.id)|\(.email)|\(.source)|\(.is_active)|\(.usage)"' ${json}`; do
+    	for u in `jq -r '.accounts[]|"\(.id)|\(.email)|\(.source)|\(.is_active)|\(.usage)"' ${json} 2>/dev/null`; do
 	    if [[ `echo ${u} | awk -F '|' '{print $1}'` != 'null' ]]; then
     		echo ${u}
 	    fi
