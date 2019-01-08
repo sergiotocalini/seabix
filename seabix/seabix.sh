@@ -124,10 +124,8 @@ get_stats() {
 	fi
     elif [[ ${type} =~ ^user$ ]]; then
 	if [[ ${resource} == 'storage_usage_perc' ]]; then
-	    total=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\") \
-	    	      | .total" ${json} 2>/dev/null`
-	    usage=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\") \
-	    	      | .usage" ${json} 2>/dev/null`
+	    total=`jq -r "first(.accounts[]|select(.id==${name} and .source==\"${param1}\")|.total)" ${json} 2>/dev/null`
+	    usage=`jq -r "first(.accounts[]|select(.id==${name} and .source==\"${param1}\")|.usage)" ${json} 2>/dev/null`
 	    res=`echo $(( (${usage:-0}*100)/${total:-1} ))`
 	elif [[ ${resource} == 'storage_usage' ]]; then
 	    res=`jq -r ".accounts[]|select(.id==${name} and .source==\"${param1}\") \
